@@ -1,3 +1,5 @@
+import getRawData from "./utils.js";
+
 class Store {
 
     constructor() {
@@ -10,11 +12,11 @@ class Store {
     }
 
     get(docId) {
-        return this.docIdx.get(docId);
+        return this.docIdx.get(docId).raw;
     }
 
     getAll() {
-        return Array.from(this.docIdx.entries()).map(entry => { return { id: entry[0], doc: entry[1] }; });
+        return Array.from(this.docIdx.entries()).map(([id, doc]) => { return { id: id, doc: doc }; });
     }
 
     put(document) {
@@ -22,18 +24,16 @@ class Store {
         const words = document.toLowerCase().split(/[\s.,;]+/);
         this.wordCount += words.length;
         this.docCount++;
-        this.docIdx.set(id, words);
+        this.docIdx.set(id, {words: words, raw: document});
         this.docTermFreq.set(id, new Map());
 
         for (let word of words) {
 
             // update IDF
-            let numDocsWithWord = 0;
-            if (this.docFreq.has(word)) {
-                numDocsWithWord = this.docFreq.get(word);
+            if (!this.docFreq.has(word)) {
+                this.docFreq.set(word, new Set());
             }
-            this.docFreq.set(word, numDocsWithWord + 1);
-
+            this.docFreq.get(word).add(id);
 
             // update TF
             let previousTF = 0;
@@ -51,7 +51,7 @@ class Store {
         return result.filter(scoredDoc => scoredDoc.score > 0).sort((doc1, doc2) => doc2.score - doc1.score);
     }
 
-    async scoreDoc({ id: docId, doc: doc }, queryWords) {
+    async scoreDoc({ id: docId, doc: {raw: doc} }, queryWords) {
         const k1 = 1.2, b = 0.75, avgLen = this.avgDocLength(), currentDocLen = this.docLength(docId);
         let score = 0;
         for (let word of queryWords) {
@@ -66,7 +66,7 @@ class Store {
         return {
             id: docId,
             score: score,
-            doc: doc
+            doc: doc.substring(0,50) + '...'
         };
     }
 
@@ -82,12 +82,12 @@ class Store {
     }
 
     docLength(docId) {
-        return this.docIdx.get(docId).length;
+        return this.docIdx.get(docId).words.length;
     }
 
     idf(word) {
         if (this.docFreq.has(word)) {
-            let nqi = this.docFreq.get(word);
+            let nqi = this.docFreq.get(word).size;
             return Math.log(1 + (this.docCount - nqi + 0.5) / (nqi + 0.5));
         }
         return 0;
@@ -96,11 +96,10 @@ class Store {
 }
 
 const s = new Store();
+const d = await getRawData();
+for (let data of d) {
+    s.put(data);
+}
 
-s.put("this is a doc");
-s.put("this is another mighty long doc");
-s.put("the mighty king of wostershier");
-s.put("somewhere in the world there is peace of mind");
-
-console.log(await s.search("this king"));
-console.log(await s.search("there is a wonderful king somewhere in wostershier"));
+console.log(await s.search("computer science data structures post nodejs clojure javascript"));
+console.log(await s.search("clojure lisp parse"));
