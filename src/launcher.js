@@ -19,16 +19,14 @@ class Store {
         return Array.from(this.docIdx.entries()).map(([id, doc]) => { return { id: id, doc: doc }; });
     }
 
-    put(document) {
-        const id = ++this.counter;
+    async put(id, document) {
         const words = document.toLowerCase().split(/[\s.,;]+/);
         this.wordCount += words.length;
         this.docCount++;
-        this.docIdx.set(id, {words: words, raw: document});
+        this.docIdx.set(id, { words: words, raw: document });
         this.docTermFreq.set(id, new Map());
 
         for (let word of words) {
-
             // update IDF
             if (!this.docFreq.has(word)) {
                 this.docFreq.set(word, new Set());
@@ -42,7 +40,6 @@ class Store {
             }
             this.docTermFreq.get(id).set(word, previousTF + 1);
         }
-        return id;
     }
 
     async search(query) {
@@ -51,7 +48,7 @@ class Store {
         return result.filter(scoredDoc => scoredDoc.score > 0).sort((doc1, doc2) => doc2.score - doc1.score);
     }
 
-    async scoreDoc({ id: docId, doc: {raw: doc} }, queryWords) {
+    async scoreDoc({ id: docId, doc: { raw: doc } }, queryWords) {
         const k1 = 1.2, b = 0.75, avgLen = this.avgDocLength(), currentDocLen = this.docLength(docId);
         let score = 0;
         for (let word of queryWords) {
@@ -66,7 +63,7 @@ class Store {
         return {
             id: docId,
             score: score,
-            doc: doc.substring(0,50) + '...'
+            doc: doc.substring(0, 50) + '...'
         };
     }
 
@@ -96,10 +93,9 @@ class Store {
 }
 
 const s = new Store();
-const d = await getRawData();
-for (let data of d) {
-    s.put(data);
-}
+await getRawData()
+    .then(async docs => Promise.all(
+        docs.map(doc => s.put((doc.id + "_" + doc.name).replace(/ /gi,'_').replace(/[^a-z0-9_]/gi,''), doc.text))
+    ))
 
-console.log(await s.search("computer science data structures post nodejs clojure javascript"));
-console.log(await s.search("clojure lisp parse"));
+console.log(await s.search("drama scary horror mississippi"));
