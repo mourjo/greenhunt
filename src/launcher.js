@@ -1,4 +1,5 @@
 import getRawData from "./utils.js";
+import * as es from "./es.js";
 
 class Store {
 
@@ -92,10 +93,15 @@ class Store {
 
 }
 
+async function indexDoc(store, doc) {
+    let sanitizedID = (doc.id + "_" + doc.name).replace(/ /gi,'_').replace(/[^a-z0-9_]/gi,'');
+    await store.put(sanitizedID, doc.text);
+    await es.insertDoc(sanitizedID, doc.text);
+}
+await es.deleteIndex();
+await es.createIndex();
 const s = new Store();
-await getRawData()
-    .then(async docs => Promise.all(
-        docs.map(doc => s.put((doc.id + "_" + doc.name).replace(/ /gi,'_').replace(/[^a-z0-9_]/gi,''), doc.text))
-    ))
+await getRawData().then(async docs => Promise.all(docs.map(doc => indexDoc(s, doc))))
 
 console.log(await s.search("drama scary horror mississippi"));
+console.log(s.docCount);
