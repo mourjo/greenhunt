@@ -45,7 +45,7 @@ class Store {
     async search(query) {
         const words = query.toLowerCase().split(/[\s.,;]+/);
         const result = await Promise.all(this.getAll().map(entry => this.scoreDoc(entry, words)));
-        return result.filter(scoredDoc => scoredDoc.score > 0).sort((doc1, doc2) => doc2.score - doc1.score);
+        return result.filter(scoredDoc => scoredDoc.score > 0).sort((doc1, doc2) => doc2.score - doc1.score).slice(0,5);
     }
 
     async scoreDoc({ id: docId, doc: { raw: doc } }, queryWords) {
