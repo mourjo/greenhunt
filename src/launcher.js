@@ -99,14 +99,14 @@ class Store {
 }
 
 async function indexDoc(store, doc) {
-    let sanitizedID = (doc.id + "_" + doc.name).replace(/ /gi, '_').replace(/[^a-z0-9_]/gi, '');
-    await store.put(sanitizedID, doc.text);
-    await es.insertDoc(sanitizedID, doc.text);
+    await store.put(doc.id, doc.text);
+    await es.insertDoc(doc.id, doc.text);
 }
 await es.deleteIndex();
 await es.createIndex();
 const s = new Store();
 await getRawData().then(async docs => Promise.all(docs.map(doc => indexDoc(s, doc))))
+await es.refresh();
 
 const q = "robert de niro al pacino";
 console.table(await s.search(q, 10));

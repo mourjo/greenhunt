@@ -100,3 +100,7 @@ export async function search(text, limit = 5) {
         };
     });
 }
+
+export async function refresh() {
+    await fetch(`http://localhost:9201/${INDEX_NAME}/_refresh`);
+}

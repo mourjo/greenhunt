@@ -6,14 +6,14 @@ export default async function getRawData() {
         .filter(line => line.length > 0)
         .map(line => {
             let movieData = JSON.parse(line);
-            return { text: movieData.plot_synopsis, id: movieData.movie_id, name: movieData.name };
+            return { text: movieData.plot_synopsis, id: movieData.id, name: movieData.name };
         });
 }
 async function enrichMovies() {
     // cat datasets/IMDB_movie_details_raw.json  | bb --stream -i '(println (:movie_id (json/parse-string  *input* true)))' | sort | uniq > /tmp/interestingids.txt
-    let mymovieIds = new Set(fs.readFileSync("/tmp/interestingids.txt", "utf8").split("\n").map(id => id.replace("/", "")));
+    let mymovieIds = new Set(fs.readFileSync("datasets/interestingids.txt", "utf8").split("\n").map(id => id.replace("/", "")));
 
-    const fileStream = fs.createReadStream("/tmp/title.basics.tsv");
+    const fileStream = fs.createReadStream("datasets/title.basics.tsv");
     const rl = readline.createInterface({
         input: fileStream,
         crlfDelay: Infinity
@@ -33,4 +33,15 @@ async function enrichMovies() {
     let enrichedMovies = mymovies.map(movie => movie.name = idToNames.get(movie.movie_id.replace("/", "")));
     fs.writeFileSync("/tmp/anotherfile.txt", mymovies.map(movie => JSON.stringify(movie)).join("\n"));
 
+}
+
+export async function enrichIDs() {
+    let newcontents = fs.readFileSync("datasets/IMDB_movie_details.json", "utf8")
+        .split("\n")
+        .map(doc => {
+            let parsed = JSON.parse(doc);
+            parsed.id = (parsed.movie_id + "_" + parsed.name).replace(/ /gi, '_').replace(/[^a-z0-9_]/gi, '');
+            return JSON.stringify(parsed);
+        }).join("\n");
+    fs.writeFileSync("datasets/IMDB_movie_details_new_ids.json", newcontents);
 }
