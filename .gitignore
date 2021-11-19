@@ -1,6 +1,3 @@
 */.DS_Store
 .DS_Store
 node_modules
-coverage
-datasets/title.basics.tsv.zip
-datasets/IMDB_movie_reviews.txt
