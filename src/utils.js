@@ -1,14 +1,26 @@
 import fs from 'fs';
 import readline from 'readline';
 export default async function getRawData() {
-    let lines = fs.readFileSync("datasets/IMDB_movie_details.json", "utf8").split("\n");
-    return lines
+    // movies
+    let movieLines = fs.readFileSync("datasets/IMDB_movie_details.json", "utf8").split("\n");
+    let movies_data = movieLines
         .filter(line => line.length > 0)
         .map(line => {
             let movieData = JSON.parse(line);
             return { text: movieData.plot_synopsis, id: movieData.id, name: movieData.name };
         });
+
+    // movie reviews
+    let lines = fs.readFileSync("datasets/IMDB_movie_reviews.txt", "utf8").split("\n");
+    return lines
+        .filter(line => line.length > 0)
+        .map((line, idx) => {
+            let id = `${idx}_${line.substring(0, 50).replace(/[^a-z0-9]/gi, '_')}`;
+            return { text: line, id: id };
+        })
+        .concat(movies_data);
 }
+
 async function enrichMovies() {
     // cat datasets/IMDB_movie_details_raw.json  | bb --stream -i '(println (:movie_id (json/parse-string  *input* true)))' | sort | uniq > /tmp/interestingids.txt
     let mymovieIds = new Set(fs.readFileSync("datasets/interestingids.txt", "utf8").split("\n").map(id => id.replace("/", "")));

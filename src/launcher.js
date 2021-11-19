@@ -5,7 +5,29 @@ import Store from "./store.js";
 
 async function indexDoc(store, doc) {
     await store.put(doc.id, doc.text);
-    await es.insertDoc(doc.id, doc.text);
+}
+
+async function indexEsDocs(docs) {
+    let batch = [], counter = 0;
+
+    const processBatch = async (aBatch, doc) => {
+        if (doc) {
+            aBatch.push(doc);
+        }
+
+        if (aBatch.length >= 2000 || !doc) {
+            await es.bulkInsert(aBatch);
+            counter += aBatch.length;
+            console.log(`${new Date()}: Inserted ${counter}/${docs.length} documents into ES`)
+            aBatch = [];
+        }
+        return aBatch;
+    };
+
+    for (const doc of docs) {
+        batch = await processBatch(batch, doc);
+    }
+    await processBatch(batch);
 }
 
 function stats(esResults, storeResults) {
@@ -24,7 +46,15 @@ function stats(esResults, storeResults) {
 await es.deleteIndex();
 await es.createIndex();
 const store = new Store();
-await getRawData().then(async docs => Promise.all(docs.map(doc => indexDoc(store, doc))))
+
+console.log(`${new Date()}: Reading raw docs from file...`);
+const docs = await getRawData();
+
+console.log(`${new Date()}: Inserting docs into store...`);
+await Promise.all(docs.map(doc => indexDoc(store, doc)));
+
+console.log(`${new Date()}: Inserting docs into ES in batches...`);
+await indexEsDocs(docs);
 await es.refresh();
 
 

@@ -65,7 +65,6 @@ export async function insertDoc(id, text, retries = 5) {
                 }
             }, (Math.random() * 1000) | 0)
         })
-
     }
 }
 
@@ -103,4 +102,26 @@ export async function search(text, limit = 5) {
 
 export async function refresh() {
     await fetch(`http://localhost:9201/${INDEX_NAME}/_refresh`);
+}
+
+
+/*
+curl -X POST "localhost:9200/_bulk?pretty" -H 'Content-Type: application/json' --data-binary'
+{ "index" : { "_index" : "test", "_id" : "1" } }
+{ "field1" : "value1" }
+{ "update" : {"_id" : "1", "_index" : "test"} }
+{ "doc" : {"field2" : "value2"} }
+'
+*/
+export async function bulkInsert(docs) {
+
+    let body = docs.map(doc =>
+        `{"index":{"_index":"${INDEX_NAME}", "_id":"${doc.id}"}}\n${JSON.stringify({ plot: doc.text })}`
+    ).join("\n");
+
+    return await fetch(`http://localhost:9201/_bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body + "\n"
+    }).then(r => r.json())
 }
