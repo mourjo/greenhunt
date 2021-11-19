@@ -76,3 +76,27 @@ curl -X DELETE "localhost:9200/my-index"
 export async function deleteIndex() {
     return await fetch(`http://localhost:9201/${INDEX_NAME}`, { method: "DELETE" }).then(r => r.json())
 }
+
+
+export async function search(text, limit = 5) {
+    let results = await fetch(`http://localhost:9201/${INDEX_NAME}/_search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            query: {
+                match: {
+                    plot: text
+                }
+            },
+            size: limit
+        })
+    }).then(r => r.json());
+
+    return results.hits.hits.map(hit => {
+        return {
+            id: hit["_id"],
+            doc: hit["_source"].plot.substring(0, 50) + "...",
+            score: hit["_score"]
+        };
+    });
+}
