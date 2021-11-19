@@ -20,8 +20,12 @@ class Store {
         return Array.from(this.docIdx.entries()).map(([id, doc]) => { return { id: id, doc: doc }; });
     }
 
+    tokenize(str) {
+        return str.toLowerCase().split(/[\s.,;]+/).map(word => word.replace(/[^a-z0-9]/gi, ''));
+    }
+
     async put(id, document) {
-        const words = document.toLowerCase().split(/[\s.,;]+/);
+        const words = this.tokenize(document);
         this.wordCount += words.length;
         this.docCount++;
         this.docIdx.set(id, { words: words, raw: document });
@@ -43,10 +47,12 @@ class Store {
         }
     }
 
-    async search(query) {
-        const words = query.toLowerCase().split(/[\s.,;]+/);
+    async search(query, limit = 5) {
+        const words = this.tokenize(query);
         const result = await Promise.all(this.getAll().map(entry => this.scoreDoc(entry, words)));
-        return result.filter(scoredDoc => scoredDoc.score > 0).sort((doc1, doc2) => doc2.score - doc1.score).slice(0,5);
+        return result
+            .filter(scoredDoc => scoredDoc.score > 0)
+            .sort((doc1, doc2) => doc2.score - doc1.score).slice(0, limit);
     }
 
     async scoreDoc({ id: docId, doc: { raw: doc } }, queryWords) {
@@ -90,11 +96,10 @@ class Store {
         }
         return 0;
     }
-
 }
 
 async function indexDoc(store, doc) {
-    let sanitizedID = (doc.id + "_" + doc.name).replace(/ /gi,'_').replace(/[^a-z0-9_]/gi,'');
+    let sanitizedID = (doc.id + "_" + doc.name).replace(/ /gi, '_').replace(/[^a-z0-9_]/gi, '');
     await store.put(sanitizedID, doc.text);
     await es.insertDoc(sanitizedID, doc.text);
 }
@@ -103,5 +108,6 @@ await es.createIndex();
 const s = new Store();
 await getRawData().then(async docs => Promise.all(docs.map(doc => indexDoc(s, doc))))
 
-console.log(await s.search("drama scary horror mississippi"));
-console.log(s.docCount);
+const q = "robert de niro al pacino";
+console.table(await s.search(q, 10));
+console.table(await es.search(q, 10));
