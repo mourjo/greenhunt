@@ -71,7 +71,25 @@ async function main() {
         "alien star wars yoda",
         "live long and prosper",
         "crime thriller",
-        "war story"
+        "war story",
+        "jurassic park",
+        "matrix revolutions",
+        "clint eastwood",
+        "best movies of 2000s",
+        "choreography cinematography photography",
+        "academy awards 1992",
+        "award winner of the year",
+        "best thing I ever watched",
+        "jet li stan lee bruce lee",
+        "karate kid",
+        "highly rated comedy movies",
+        "direction and production and the cast",
+        "Henri de Toulouse-Lautrec",
+        "hostile environment makes his way to the apartment of Lucille before it can destroy the mole",
+        "Judd Hirsch and Scott Cohen are great as father and son",
+        "awful theme song",
+        "moments of humor",
+        "back story is compelling"
     ];
 
     const comparison = await Promise.all(queries.map(async q => {
