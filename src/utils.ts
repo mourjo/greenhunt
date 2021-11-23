@@ -7,7 +7,7 @@ export type RawDocument = {
     name?: string;
 }
 
-export default async function getRawData() : Promise<RawDocument[]> {
+export default async function getRawData(): Promise<RawDocument[]> {
     // movies
     let movieLines = fs.readFileSync("datasets/IMDB_movie_details.json", "utf8").split("\n");
     let movies_data = movieLines

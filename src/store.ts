@@ -1,7 +1,7 @@
 type Document = {
     words: string[];
-     raw: string;
-     id: string;
+    raw: string;
+    id: string;
 }
 
 export interface ScoredDocument extends Document {
@@ -10,11 +10,11 @@ export interface ScoredDocument extends Document {
 }
 
 export default class Store {
-    docTermFreq : Map<string, Map<string,number>>;
-    wordCount : number;
-    docCount : number;
-    docIdx : Map<string, Document>;
-    docFreq : Map<string, Set<string>>;
+    docTermFreq: Map<string, Map<string, number>>;
+    wordCount: number;
+    docCount: number;
+    docIdx: Map<string, Document>;
+    docFreq: Map<string, Set<string>>;
 
 
     constructor() {
@@ -25,7 +25,7 @@ export default class Store {
         this.docFreq = new Map();
     }
 
-    get(docId:string) {
+    get(docId: string) {
         return this.docIdx.get(docId)?.raw;
     }
 
@@ -37,7 +37,7 @@ export default class Store {
         return str.toLowerCase().split(/[\s.,;]+/).map(word => word.replace(/[^a-z0-9]/gi, ''));
     }
 
-    async put(id: string, document:string) {
+    async put(id: string, document: string) {
         const words = this.tokenize(document);
         this.wordCount += words.length;
         this.docCount++;
@@ -60,7 +60,7 @@ export default class Store {
         }
     }
 
-    async search(query:string, limit = 5) : Promise<ScoredDocument[]>{
+    async search(query: string, limit = 5): Promise<ScoredDocument[]> {
         const words = this.tokenize(query);
         const result = await Promise.all(this.getAll().map(entry => this.scoreDoc(entry, words)));
         return result
@@ -69,7 +69,7 @@ export default class Store {
             .slice(0, limit);
     }
 
-    async scoreDoc({ id: docId, doc: doc } : {id: string, doc: Document}, queryWords : string[]) : Promise<ScoredDocument> {
+    async scoreDoc({ id: docId, doc: doc }: { id: string, doc: Document }, queryWords: string[]): Promise<ScoredDocument> {
         const k1 = 1.2, b = 0.75, avgLen = this.avgDocLength(), currentDocLen = this.docLength(docId);
         let score = 0;
         for (let word of queryWords) {
@@ -81,7 +81,7 @@ export default class Store {
 
             score += this.idf(word) * (numerator / denominator);
         }
-        
+
         return {
             words: doc.words,
             id: doc.id,

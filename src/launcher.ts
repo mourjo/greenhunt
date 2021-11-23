@@ -1,16 +1,16 @@
 import getRawData from "./utils.js";
 import * as es from "./es.js";
-import Store, {ScoredDocument} from "./store.js";
-import {RawDocument} from './utils.js';
+import Store, { ScoredDocument } from "./store.js";
+import { RawDocument } from './utils.js';
 
 async function indexDoc(store: Store, doc: RawDocument) {
     await store.put(doc.id, doc.text);
 }
 
-async function indexEsDocs(docs : RawDocument[]) {
-    let batch : Array<RawDocument> = [], counter = 0;
+async function indexEsDocs(docs: RawDocument[]) {
+    let batch: Array<RawDocument> = [], counter = 0;
 
-    const processBatch = async (aBatch: Array<RawDocument>, doc:RawDocument|null) => {
+    const processBatch = async (aBatch: Array<RawDocument>, doc: RawDocument | null) => {
         if (doc) {
             aBatch.push(doc);
         }
@@ -30,7 +30,7 @@ async function indexEsDocs(docs : RawDocument[]) {
     await processBatch(batch, null);
 }
 
-function stats(esResults : es.ESResult[], storeResults: ScoredDocument[]) {
+function stats(esResults: es.ESResult[], storeResults: ScoredDocument[]) {
     let relevant = esResults.map(doc => doc.id);
 
     let retrieved = storeResults.map(doc => doc.id);

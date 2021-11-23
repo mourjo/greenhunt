@@ -82,7 +82,7 @@ export type ESResult = {
     score: number
 }
 
-export async function search(text: string, limit = 5) : Promise<ESResult[]> {
+export async function search(text: string, limit = 5): Promise<ESResult[]> {
     let results: any = await fetch(`http://localhost:9201/${INDEX_NAME}/_search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -118,7 +118,7 @@ curl -X POST "localhost:9200/_bulk?pretty" -H 'Content-Type: application/json' -
 { "doc" : {"field2" : "value2"} }
 '
 */
-export async function bulkInsert(docs : any[]) {
+export async function bulkInsert(docs: any[]) {
 
     let body = docs.map(doc =>
         `{"index":{"_index":"${INDEX_NAME}", "_id":"${doc.id}"}}\n${JSON.stringify({ plot: doc.text })}`
