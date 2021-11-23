@@ -12,7 +12,7 @@ export interface ScoredDocument extends Document {
 export default class Store {
     docTermFreq: Map<string, Map<string, number>>;
     wordCount: number;
-    docCount: number;
+    documents: Document[];
     docIdx: Map<string, Document>;
     docFreq: Map<string, Set<string>>;
 
@@ -20,9 +20,9 @@ export default class Store {
     constructor() {
         this.docTermFreq = new Map();
         this.wordCount = 0;
-        this.docCount = 0;
         this.docIdx = new Map();
         this.docFreq = new Map();
+        this.documents = [];
     }
 
     get(docId: string) {
@@ -30,7 +30,7 @@ export default class Store {
     }
 
     getAll() {
-        return Array.from(this.docIdx.entries()).map(([id, doc]) => { return { id: id, doc: doc }; });
+        return this.documents;
     }
 
     tokenize(str: string) {
@@ -40,9 +40,10 @@ export default class Store {
     async put(id: string, document: string) {
         const words = this.tokenize(document);
         this.wordCount += words.length;
-        this.docCount++;
-        this.docIdx.set(id, { words: words, raw: document, id: id });
+        const currDoc = { words: words, raw: document, id: id };
+        this.docIdx.set(id, currDoc);
         this.docTermFreq.set(id, new Map());
+        this.documents.push(currDoc);
 
         for (let word of words) {
             // update IDF
@@ -69,11 +70,11 @@ export default class Store {
             .slice(0, limit);
     }
 
-    async scoreDoc({ id: docId, doc: doc }: { id: string, doc: Document }, queryWords: string[]): Promise<ScoredDocument> {
-        const k1 = 1.2, b = 0.75, avgLen = this.avgDocLength(), currentDocLen = this.docLength(docId);
+    async scoreDoc(doc: Document, queryWords: string[]): Promise<ScoredDocument> {
+        const k1 = 1.2, b = 0.75, avgLen = this.avgDocLength(), currentDocLen = this.docLength(doc.id);
         let score = 0;
         for (let word of queryWords) {
-            const currentTF = this.tf(word, docId);
+            const currentTF = this.tf(word, doc.id);
             let numerator = currentTF * (k1 + 1);
 
             let x = k1 * (1 - b + (b * currentDocLen / avgLen));
@@ -99,7 +100,7 @@ export default class Store {
     }
 
     avgDocLength() {
-        return this.wordCount / this.docCount;
+        return this.wordCount / this.documents.length;
     }
 
     docLength(docId: string) {
@@ -109,7 +110,7 @@ export default class Store {
     idf(word: string) {
         if (this.docFreq.has(word)) {
             let nqi = this.docFreq.get(word)!.size;
-            return Math.log(1 + (this.docCount - nqi + 0.5) / (nqi + 0.5));
+            return Math.log(1 + (this.documents.length - nqi + 0.5) / (nqi + 0.5));
         }
         return 0;
     }
