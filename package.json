@@ -7,7 +7,7 @@
     "example": "examples"
   },
   "scripts": {
-    "start": "node target/launcher.js",
+    "start": "tsc && node target/launcher.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -18,6 +18,8 @@
     "jsdom": "^18.1.0",
     "node-fetch": "^3.1.0",
     "tsc": "^2.0.3",
-    "tslib": "^2.3.1"
+    "tslib": "^2.3.1",
+    "tslint": "^6.1.3",
+    "typescript": "^4.5.2"
   }
 }
