@@ -2,18 +2,22 @@
   "name": "greenhunt",
   "version": "1.0.0",
   "description": "",
-  "main": "src/launcher.js",
+  "main": "target/launcher.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
+    "start": "node target/launcher.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/node": "^16.11.9",
     "jsdom": "^18.1.0",
-    "node-fetch": "^3.1.0"
+    "node-fetch": "^3.1.0",
+    "tsc": "^2.0.3",
+    "tslib": "^2.3.1"
   }
 }

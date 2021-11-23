@@ -1,6 +1,13 @@
 import fs from 'fs';
 import readline from 'readline';
-export default async function getRawData() {
+
+export type RawDocument = {
+    text: string;
+    id: string;
+    name?: string;
+}
+
+export default async function getRawData() : Promise<RawDocument[]> {
     // movies
     let movieLines = fs.readFileSync("datasets/IMDB_movie_details.json", "utf8").split("\n");
     let movies_data = movieLines
