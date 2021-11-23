@@ -42,7 +42,7 @@ curl -XPOST "http://es01:9200/test/_doc" -H 'Content-Type: application/json' -d'
   "field1": "i am a value"
 }'
 */
-export async function insertDoc(id, text, retries = 5) {
+export async function insertDoc(id: string, text: string, retries = 5) {
     try {
         return await fetch(`http://localhost:9201/${INDEX_NAME}/_doc/${id}`, {
             method: "PUT",
@@ -76,9 +76,14 @@ export async function deleteIndex() {
     return await fetch(`http://localhost:9201/${INDEX_NAME}`, { method: "DELETE" }).then(r => r.json())
 }
 
+export type ESResult = {
+    id: string,
+    doc: string,
+    score: number
+}
 
-export async function search(text, limit = 5) {
-    let results = await fetch(`http://localhost:9201/${INDEX_NAME}/_search`, {
+export async function search(text: string, limit = 5) : Promise<ESResult[]> {
+    let results: any = await fetch(`http://localhost:9201/${INDEX_NAME}/_search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -91,7 +96,7 @@ export async function search(text, limit = 5) {
         })
     }).then(r => r.json());
 
-    return results.hits.hits.map(hit => {
+    return results.hits.hits.map((hit: any) => {
         return {
             id: hit["_id"],
             doc: hit["_source"].plot.substring(0, 50) + "...",
@@ -113,7 +118,7 @@ curl -X POST "localhost:9200/_bulk?pretty" -H 'Content-Type: application/json' -
 { "doc" : {"field2" : "value2"} }
 '
 */
-export async function bulkInsert(docs) {
+export async function bulkInsert(docs : any[]) {
 
     let body = docs.map(doc =>
         `{"index":{"_index":"${INDEX_NAME}", "_id":"${doc.id}"}}\n${JSON.stringify({ plot: doc.text })}`
@@ -125,3 +130,4 @@ export async function bulkInsert(docs) {
         body: body + "\n"
     }).then(r => r.json())
 }
+

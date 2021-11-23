@@ -1,4 +1,21 @@
+type Document = {
+    words: string[];
+     raw: string;
+     id: string;
+}
+
+export interface ScoredDocument extends Document {
+    score: number;
+    title: string;
+}
+
 export default class Store {
+    docTermFreq : Map<string, Map<string,number>>;
+    wordCount : number;
+    docCount : number;
+    docIdx : Map<string, Document>;
+    docFreq : Map<string, Set<string>>;
+
 
     constructor() {
         this.docTermFreq = new Map();
@@ -6,26 +23,25 @@ export default class Store {
         this.docCount = 0;
         this.docIdx = new Map();
         this.docFreq = new Map();
-        this.counter = 0;
     }
 
-    get(docId) {
-        return this.docIdx.get(docId).raw;
+    get(docId:string) {
+        return this.docIdx.get(docId)?.raw;
     }
 
     getAll() {
         return Array.from(this.docIdx.entries()).map(([id, doc]) => { return { id: id, doc: doc }; });
     }
 
-    tokenize(str) {
+    tokenize(str: string) {
         return str.toLowerCase().split(/[\s.,;]+/).map(word => word.replace(/[^a-z0-9]/gi, ''));
     }
 
-    async put(id, document) {
+    async put(id: string, document:string) {
         const words = this.tokenize(document);
         this.wordCount += words.length;
         this.docCount++;
-        this.docIdx.set(id, { words: words, raw: document });
+        this.docIdx.set(id, { words: words, raw: document, id: id });
         this.docTermFreq.set(id, new Map());
 
         for (let word of words) {
@@ -33,18 +49,18 @@ export default class Store {
             if (!this.docFreq.has(word)) {
                 this.docFreq.set(word, new Set());
             }
-            this.docFreq.get(word).add(id);
+            this.docFreq.get(word)?.add(id);
 
             // update TF
             let previousTF = 0;
-            if (this.docTermFreq.get(id).has(word)) {
-                previousTF = this.docTermFreq.get(id).get(word);
+            if (this.docTermFreq.get(id)?.has(word)) {
+                previousTF = this.docTermFreq.get(id)!.get(word)!;
             }
-            this.docTermFreq.get(id).set(word, previousTF + 1);
+            this.docTermFreq.get(id)!.set(word, previousTF + 1);
         }
     }
 
-    async search(query, limit = 5) {
+    async search(query:string, limit = 5) : Promise<ScoredDocument[]>{
         const words = this.tokenize(query);
         const result = await Promise.all(this.getAll().map(entry => this.scoreDoc(entry, words)));
         return result
@@ -53,7 +69,7 @@ export default class Store {
             .slice(0, limit);
     }
 
-    async scoreDoc({ id: docId, doc: { raw: doc } }, queryWords) {
+    async scoreDoc({ id: docId, doc: doc } : {id: string, doc: Document}, queryWords : string[]) : Promise<ScoredDocument> {
         const k1 = 1.2, b = 0.75, avgLen = this.avgDocLength(), currentDocLen = this.docLength(docId);
         let score = 0;
         for (let word of queryWords) {
@@ -65,16 +81,19 @@ export default class Store {
 
             score += this.idf(word) * (numerator / denominator);
         }
+        
         return {
-            id: docId,
+            words: doc.words,
+            id: doc.id,
+            raw: doc.raw,
             score: score,
-            doc: doc.substring(0, 50) + '...'
+            title: doc.raw.substring(0, 50) + '...'
         };
     }
 
-    tf(word, docId) {
-        if (this.docTermFreq.get(docId).has(word)) {
-            return this.docTermFreq.get(docId).get(word);
+    tf(word: string, docId: string) {
+        if (this.docTermFreq.get(docId)!.has(word)) {
+            return this.docTermFreq.get(docId)!.get(word)!;
         }
         return 0;
     }
@@ -83,13 +102,13 @@ export default class Store {
         return this.wordCount / this.docCount;
     }
 
-    docLength(docId) {
-        return this.docIdx.get(docId).words.length;
+    docLength(docId: string) {
+        return this.docIdx.get(docId)!.words.length;
     }
 
-    idf(word) {
+    idf(word: string) {
         if (this.docFreq.has(word)) {
-            let nqi = this.docFreq.get(word).size;
+            let nqi = this.docFreq.get(word)!.size;
             return Math.log(1 + (this.docCount - nqi + 0.5) / (nqi + 0.5));
         }
         return 0;
