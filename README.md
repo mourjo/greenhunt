@@ -13,36 +13,40 @@ npm start
 # Results
 The sample data set contains 50K documents containing movie descriptions and reviews. Both ES and the Store implemented in this project are searched with the same query and are asked to return the 10 most relevant documents. The following is the precision/recall of the Store compared to ES.
 
-
-|                                             query                                              | precision | recall |
-|------------------------------------------------------------------------------------------------|-----------|--------|
-|                                             '1970'                                             |   0.32    |  0.32  |
-|                                    'a visit to the library'                                    |   0.88    |  0.88  |
-|                                     'academy awards 1992'                                      |   0.96    |  0.96  |
-|                                     'alien star wars yoda'                                     |     1     |   1    |
-|                                  'america washington france'                                   |   0.96    |  0.96  |
-|                                   'award winner of the year'                                   |   0.92    |  0.92  |
-|                                       'awful theme song'                                       |   0.92    |  0.92  |
-|                                   'back story is compelling'                                   |   0.92    |  0.92  |
-|                                     'best movies of 2000s'                                     |   0.44    |  0.44  |
-|                                  'best thing I ever watched'                                   |   0.92    |  0.92  |
-|                           'choreography cinematography photography'                            |   0.92    |  0.92  |
-|                                        'clint eastwood'                                        |   0.96    |  0.96  |
-|                                        'crime thriller'                                        |   0.88    |  0.88  |
-|                            'direction and production and the cast'                             |   0.96    |  0.96  |
-|                                     'github gitlab fitbit'                                     |    NaN    |  NaN   |
-|                                  'Henri de Toulouse-Lautrec'                                   |   0.64    |  0.64  |
-|                                  'highly rated comedy movies'                                  |   0.76    |  0.76  |
-|                                            'horror'                                            |    0.8    |  0.8   |
-| 'hostile environment makes his way to the apartment of Lucille before it can destroy the mole' |   0.92    |  0.92  |
-|                                  'jet li stan lee bruce lee'                                   |     1     |   1    |
-|                   'Judd Hirsch and Scott Cohen are great as father and son'                    |   0.96    |  0.96  |
-|                                        'jurassic park'                                         |   0.96    |  0.96  |
-|                                          'karate kid'                                          |   0.92    |  0.92  |
-|                                    'live long and prosper'                                     |   0.84    |  0.84  |
-|                                      'matrix revolutions'                                      |   0.92    |  0.92  |
-|                                       'moments of humor'                                       |   0.96    |  0.96  |
-|                                   'robert de niro al pacino'                                   |   0.96    |  0.96  |
-|                                          'war story'                                           |   0.92    |  0.92  |
-|                      'wars were common in the early days of civilization'                      |   0.92    |  0.92  |
-|                                          'world war'                                           |     1     |   1    |
+```
+┌─────────┬────────────────────────────────────────────────────────────────────────────────────────────────┬───────────┬────────┐
+│ (index) │                                             query                                              │ precision │ recall │
+├─────────┼────────────────────────────────────────────────────────────────────────────────────────────────┼───────────┼────────┤
+│    0    │                                             '1970'                                             │   0.84    │  0.84  │
+│    1    │                                    'a visit to the library'                                    │   0.92    │  0.92  │
+│    2    │                                     'academy awards 1992'                                      │   0.96    │  0.96  │
+│    3    │                                     'alien star wars yoda'                                     │     1     │   1    │
+│    4    │                                  'america washington france'                                   │   0.92    │  0.92  │
+│    5    │                                   'award winner of the year'                                   │   0.84    │  0.84  │
+│    6    │                                       'awful theme song'                                       │   0.96    │  0.96  │
+│    7    │                                   'back story is compelling'                                   │     1     │   1    │
+│    8    │                                     'best movies of 2000s'                                     │   0.76    │  0.76  │
+│    9    │                                  'best thing I ever watched'                                   │   0.92    │  0.92  │
+│   10    │                           'choreography cinematography photography'                            │     1     │   1    │
+│   11    │                                        'clint eastwood'                                        │     1     │   1    │
+│   12    │                                        'crime thriller'                                        │   0.96    │  0.96  │
+│   13    │                            'direction and production and the cast'                             │   0.92    │  0.92  │
+│   14    │                                     'github gitlab fitbit'                                     │    NaN    │  NaN   │
+│   15    │                                  'Henri de Toulouse-Lautrec'                                   │   0.76    │  0.76  │
+│   16    │                                  'highly rated comedy movies'                                  │   0.72    │  0.72  │
+│   17    │                                            'horror'                                            │   0.84    │  0.84  │
+│   18    │ 'hostile environment makes his way to the apartment of Lucille before it can destroy the mole' │     1     │   1    │
+│   19    │                                  'jet li stan lee bruce lee'                                   │     1     │   1    │
+│   20    │                   'Judd Hirsch and Scott Cohen are great as father and son'                    │   0.96    │  0.96  │
+│   21    │                                        'jurassic park'                                         │   0.96    │  0.96  │
+│   22    │                                          'karate kid'                                          │   0.88    │  0.88  │
+│   23    │                                    'live long and prosper'                                     │   0.96    │  0.96  │
+│   24    │                                      'matrix revolutions'                                      │     1     │   1    │
+│   25    │                                       'moments of humor'                                       │   0.96    │  0.96  │
+│   26    │                                   'robert de niro al pacino'                                   │   0.92    │  0.92  │
+│   27    │                                  'ship sink iceberg atlantic'                                  │   0.96    │  0.96  │
+│   28    │                                          'war story'                                           │   0.84    │  0.84  │
+│   29    │                      'wars were common in the early days of civilization'                      │   0.88    │  0.88  │
+│   30    │                                          'world war'                                           │   0.84    │  0.84  │
+└─────────┴────────────────────────────────────────────────────────────────────────────────────────────────┴───────────┴────────┘
+```

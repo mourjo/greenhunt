@@ -1,2 +1,4 @@
 datasets/title.basics.tsv.zip filter=lfs diff=lfs merge=lfs -text
 datasets/IMDB_movie_reviews.txt filter=lfs diff=lfs merge=lfs -text
+datasets/movie.metadata.tsv filter=lfs diff=lfs merge=lfs -text
+datasets/plot_summaries.txt filter=lfs diff=lfs merge=lfs -text

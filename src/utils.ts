@@ -8,24 +8,24 @@ export type RawDocument = {
 }
 
 export default async function getRawData(): Promise<RawDocument[]> {
-    // movies
-    let movieLines = fs.readFileSync("datasets/IMDB_movie_details.json", "utf8").split("\n");
-    let movies_data = movieLines
-        .filter(line => line.length > 0)
-        .map(line => {
-            let movieData = JSON.parse(line);
-            return { text: movieData.plot_synopsis, id: movieData.id, name: movieData.name };
-        });
+    let movieNames = fs.readFileSync("datasets/movie.metadata.tsv", "utf8")
+        .split("\n")
+        .reduce((acc: Map<string, string>, line: string) => {
+            const movieAttrs = line.split("\t");
+            acc.set(movieAttrs[0], movieAttrs[2]);
+            return acc;
+        }, new Map());
 
-    // movie reviews
-    let lines = fs.readFileSync("datasets/IMDB_movie_reviews.txt", "utf8").split("\n");
-    return lines
-        .filter(line => line.length > 0)
-        .map((line, idx) => {
-            let id = `${idx}_${line.substring(0, 50).replace(/[^a-z0-9]/gi, '_')}`;
-            return { text: line, id: id };
+    return fs.readFileSync("datasets/plot_summaries.txt", "utf8")
+        .split("\n")
+        .map(line => {
+            const data = line.split("\t");
+            const name = movieNames.get(data[0]);
+            const plot = data[1];
+            const id = `${data[0]}_${name}`.replace(/[^a-z0-9]/gi, "_");
+            return { text: plot, id: id };
         })
-        .concat(movies_data);
+        .filter(({text: text, id: id}) => text && id && text.length > 0 && id.length > 0);
 }
 
 async function enrichMovies() {

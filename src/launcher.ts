@@ -89,7 +89,8 @@ async function main() {
         "Judd Hirsch and Scott Cohen are great as father and son",
         "awful theme song",
         "moments of humor",
-        "back story is compelling"
+        "back story is compelling",
+        "ship sink iceberg atlantic"
     ];
 
     const comparison = await Promise.all(queries.map(async q => {
